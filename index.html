@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>โปรแกรมออกแบบตารางฟิตหุ่นส่วนบุคคล - เวอร์ชันกลุ่มเด็กใหม่</title>
+    <!-- ดึงระบบแปลงหน้าเว็บเป็นรูปภาพมาใช้งาน ฟรี ไม่ต้องติดตั้งเพิ่ม -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-color: #151f32;
+            --accent-color: #38bdf8;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --border-color: #24324d;
+            --rest-bg: #111827;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        /* ป้ายเตือนว่ากำลังพัฒนาเว็บ */
+        .dev-badge {
+            background-color: #f59e0b;
+            color: #0b0f19;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 15px;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .preview-wrapper {
+            width: 100%;
+            max-width: 950px;
+            transition: all 0.3s ease;
+        }
+
+        .preview-wrapper.mobile {
+            max-width: 375px;
+            border: 4px solid #334155;
+            border-radius: 20px;
+            padding: 10px;
+            background: #000;
+        }
+
+        .preview-wrapper.ipad {
+            max-width: 768px;
+            border: 4px solid #334155;
+            border-radius: 20px;
+            padding: 15px;
+            background: #000;
+        }
+
+        .container {
+            width: 100%;
+            background: var(--card-color);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+            box-sizing: border-box;
+        }
+
+        .control-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            width: 100%;
+            max-width: 950px;
+            box-sizing: border-box;
+        }
+
+        .control-btn {
+            background: #0f172a;
+            color: #fff;
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .control-btn.active {
+            background: var(--accent-color);
+            color: #0b0f19;
+            border-color: var(--accent-color);
+        }
+
+        .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .color-picker-wrapper input {
+            width: 40px;
+            height: 30px;
+            padding: 0;
+            border: none;
+            cursor: pointer;
+            background: transparent;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 26px;
+            margin-bottom: 5px;
+            color: #fff;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-sub);
+            margin-bottom: 30px;
+            font-size: 15px;
+        }
+
+        h3 {
+            border-left: 4px solid var(--accent-color);
+            padding-left: 10px;
+            color: #fff;
+            margin-top: 25px;
+            font-size: 18px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 680px) {
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--text-sub);
+            font-size: 14px;
+        }
+
+        select, input, textarea {
+            width: 100%;
+            padding: 12px;
+            background: #0b0f19;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 15px;
+            color: #fff;
+            font-family: inherit;
+        }
+
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        textarea {
+            resize: vertical;
+            height: 70px;
+        }
+
+        .action-btn {
+            width: 100%;
+            background-color: var(--accent-color);
+            color: #0b0f19;
+            padding: 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 15px;
+        }
+
+        .action-btn:hover {
+            opacity: 0.9;
+        }
+
+        .download-btn {
+            background-color: #10b981;
+            color: white;
+            margin-top: 15px;
+        }
+
+        /* โซนวิเคราะห์หุ่น */
+        .analysis-section {
+            display: none;
+            background: #0b0f19;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 30px;
+            border: 1px solid var(--border-color);
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .metric-box {
+            background: var(--card-color);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border-top: 3px solid var(--accent-color);
+        }
+
+        .metric-val {
+            font-size: 26px;
+            font-weight: bold;
+            color: #fff;
+            margin: 8px 0;
+        }
+
+        /* โซนปฏิทินที่จะถูกถ่ายรูป */
+        .result-section {
+            margin-top: 40px;
+            display: none;
+        }
+
+        .capture-area {
+            background: var(--card-color);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        .timetable {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .mobile .timetable { grid-template-columns: 1fr; }
+        .ipad .timetable { grid-template-columns: repeat(2, 1fr); }
+
+        @media (max-width: 900px) {
+            .timetable { grid-template-columns: 1fr; }
+        }
+
+        .day-card {
+            background: var(--rest-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .day-card.active {
+            background: var(--card-color);
+            border-color: var(--accent-color);
+        }
+
+        .day-name {
+            font-weight: bold;
+            font-size: 16px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .day-card.active .day-name {
+            color: var(--accent-color);
+            border-bottom-color: var(--accent-color);
+        }
+
+        .exercise-item {
+            background: #0b0f19;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .special-badge {
+            background: #10b981;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 4px;
+        }
+
+        .rest-text {
+            color: var(--text-sub);
+            text-align: center;
+            font-style: italic;
+            margin-top: 20px;
+        }
+
+        .cheer-box {
+            text-align: center;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border: 2px dashed var(--accent-color);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            letter-spacing: 0.5px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-sub);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ป้ายบอกสถานะเว็บตามที่ขอมาครับ -->
+<div class="dev-badge">⚙️ ตัวเว็บเวอร์ชัน Beta: อยู่ในช่วงพัฒนาพัฒนาและทดสอบระบบ</div>
+
+<div class="control-panel">
+    <button class="control-btn active" onclick="changeSize('desktop', this)">🖥️ จอคอมฯปกติ</button>
+    <button class="control-btn" onclick="changeSize('ipad', this)">📱 จอไอแพด</button>
+    <button class="control-btn" onclick="changeSize('mobile', this)">📞 จอมือถือ</button>
+    
+    <div class="color-picker-wrapper">
+        🎨 เปลี่ยนสีธีมตาราง:
+        <input type="color" id="themeColorPicker" value="#38bdf8" oninput="updateThemeColor(this.value)">
+    </div>
+</div>
+
+<div class="preview-wrapper" id="previewWrapper">
+    <div class="container">
+        <h1>🏋️‍♂️ ออกแบบตารางซ้อมตามใจคุณ</h1>
+        <div class="subtitle">เช็กสภาพร่างกาย ตั้งเป้าหมาย แล้วลุยไปด้วยกันเลยครับ</div>
+
+        <h3>1. สัดส่วนและเพศ</h3>
+        <div class="grid-2">
+            <div class="form-group">
+                <label>เพศของคุณ:</label>
+                <select id="gender">
+                    <option value="male">ผู้ชาย</option>
+                    <option value="female">ผู้หญิง</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>อายุ (ปี):</label>
+                <input type="number" id="age" value="20">
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label>น้ำหนักตัว (กก.):</label>
+                <input type="number" id="weight" value="65">
+            </div>
+            <div class="form-group">
+                <label>ส่วนสูง (ซม.):</label>
+                <input type="number" id="height" value="170">
+            </div>
+        </div>
+
+        <h3>2. สไตล์การฝึกซ้อมที่ชอบ</h3>
+        <div class="form-group">
+            <label>เป้าหมายในรอบนี้:</label>
+            <select id="goal">
+                <option value="fat_loss">เน้นเผาผลาญไขมัน กระชับสัดส่วนให้ลีน</option>
+                <option value="hypertrophy">เน้นสร้างมวลกล้ามเนื้อให้แน่น ตัวหนาขึ้น</option>
+                <option value="health">เน้นความอึด ร่างกายแข็งแรง ไม่เหนื่อยง่าย</option>
+            </select>
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label>สะดวกเล่นกี่วันต่อสัปดาห์?</label>
+                <select id="daysCount">
+                    <option value="3">สัปดาห์ละ 3 วัน (วันเว้นวัน)</option>
+                    <option value="4" selected>สัปดาห์ละ 4 วัน (สูตรมาตรฐาน)</option>
+                    <option value="5">สัปดาห์ละ 5 วัน (จัดเต็มความฟิต)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>มีจุดไหนที่บาดเจ็บหรือเล่นไม่ได้ไหม?</label>
+                <input type="text" id="injury" placeholder="เช่น เจ็บหัวเข่า, ปวดข้อมือ">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>อยากให้มีท่าไหนเป็นพิเศษไหม? (พิมพ์บอกโค้ดได้เลย)</label>
+            <textarea id="specialExercise" placeholder="เช่น ขอท่าซิทอัพ, ท่าสควอช..."></textarea>
+        </div>
+
+        <button class="action-btn" onclick="generateCustomPlan()">🔥 คำนวณและกางตารางซ้อม</button>
+
+        <!-- โซนวิเคราะห์สรีระ -->
+        <div class="analysis-section" id="analysisSection">
+            <h3>📊 ผลการวิเคราะห์ร่างกายของคุณ</h3>
+            <div class="metrics-grid">
+                <div class="metric-box">
+                    <label>ดัชนีมวลกาย (BMI)</label>
+                    <div class="metric-val" id="bmiVal">0</div>
+                    <div id="bmiStatus" style="font-weight: bold; font-size: 14px;"></div>
+                </div>
+                <div class="metric-box">
+                    <label>พลังงานเผาผลาญพื้นฐาน (BMR)</label>
+                    <div class="metric-val" id="bmrVal">0</div>
+                    <div style="color: var(--text-sub); font-size: 13px;">แคลอรี / วัน</div>
+                </div>
+                <div class="metric-box">
+                    <label>บันทึกการเซฟร่างกาย</label>
+                    <div id="injuryNote" style="font-size: 13px; font-weight: bold; margin-top: 10px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- โซนที่จะทำการแปลงเป็นรูปภาพ -->
+        <div class="result-section" id="resultSection">
+            <div class="capture-area" id="captureArea">
+                <h2 style="text-align: center; margin-top: 5px;">🗓️ ตารางโปรแกรมประจำสัปดาห์</h2>
+                <div class="timetable" id="timetable"></div>
+                
+                <!-- อัปเดตข้อความให้กำลังใจด้านล่างตามสั่งเรียบร้อย -->
+                <div class="cheer-box">
+                    💪 สู้เรามาถึงเป้าหมายไปด้วยกันนะ by กลุ่มเด็กใหม่ slp 🌟
+                </div>
+            </div>
+
+            <!-- ปุ่มดาวน์โหลดรูปภาพ -->
+            <button class="action-btn download-btn" onclick="downloadAsImage()">📸 ดาวน์โหลดตารางนี้เป็นรูปภาพ (PNG)</button>
+        </div>
+
+        <!-- อัปเดตชื่อกลุ่มด้านล่างสุดเรียบร้อย -->
+        <div class="footer">
+            ระบบสร้างตารางออกกำลังกายอัตโนมัติ (เวอร์ชันพัฒนา) | พัฒนาโดยกลุ่มเด็กใหม่
+        </div>
+    </div>
+</div>
+
+<script>
+    function changeSize(size, btn) {
+        const wrapper = document.getElementById('previewWrapper');
+        const buttons = document.querySelectorAll('.control-btn');
+        buttons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        wrapper.className = 'preview-wrapper ' + (size !== 'desktop' ? size : '');
+    }
+
+    function updateThemeColor(color) {
+        document.documentElement.style.setProperty('--accent-color', color);
+    }
+
+    function generateCustomPlan() {
+        const gender = document.getElementById('gender').value;
+        const age = parseInt(document.getElementById('age').value) || 20;
+        const weight = parseFloat(document.getElementById('weight').value) || 50;
+        const height = parseFloat(document.getElementById('height').value) || 150;
+        const goal = document.getElementById('goal').value;
+        const daysCount = parseInt(document.getElementById('daysCount').value);
+        const injury = document.getElementById('injury').value.trim();
+        const specialExercise = document.getElementById('specialExercise').value.trim();
+
+        const heightM = height / 100;
+        const bmi = weight / (heightM * heightM);
+        document.getElementById('bmiVal').innerText = bmi.toFixed(1);
+
+        let bmiStatus = "";
+        let bmiColor = "#38bdf8";
+        if (bmi < 18.5) { bmiStatus = "น้ำหนักน้อยไปนิดนึง"; bmiColor = "#fbbf24"; }
+        else if (bmi < 23) { bmiStatus = "หุ่นสมส่วนดีเยี่ยมเลยครับ"; bmiColor = "#10b981"; }
+        else if (bmi < 25) { bmiStatus = "เริ่มมีน้ำมีนวล ควรรีดไขมัน"; bmiColor = "#f97316"; }
+        else { bmiStatus = "น้ำหนักเกินเกณฑ์มาตรฐาน"; bmiColor = "#ef4444"; }
+        
+        const bmiStatusDiv = document.getElementById('bmiStatus');
+        bmiStatusDiv.innerText = bmiStatus;
+        bmiStatusDiv.style.color = bmiColor;
+
+        let bmr = 0;
+        if (gender === 'male') {
+            bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5;
+        } else {
+            bmr = (10 * weight) + (6.25 * height) - (5 * age) - 161;
+        }
+        document.getElementById('bmrVal').innerText = Math.round(bmr).toLocaleString();
+
+        const injuryNote = document.getElementById('injuryNote');
+        if (injury) {
+            injuryNote.innerText = `⚠️ คอยเซฟตรง "${injury}" ด้วยนะ อย่าฝืนท่าที่เจ็บ!`;
+            injuryNote.style.color = "#f43f5e";
+        } else {
+            injuryNote.innerText = "✅ ร่างกายสมบูรณ์ดีพร้อม ลุยซ้อมได้เต็มที่!";
+            injuryNote.style.color = "#10b981";
+        }
+
+        document.getElementById('analysisSection').style.display = 'block';
+
+        const days = ['จันทร์', 'อังคาร', 'พุธ', 'พฤหัสฯ', 'ศุกร์', 'เสาร์', 'อาทิตย์'];
+        let workoutDays = [];
+        if (daysCount === 3) workoutDays = ['จันทร์', 'พุธ', 'ศุกร์'];
+        else if (daysCount === 4) workoutDays = ['จันทร์', 'อังคาร', 'พฤหัสฯ', 'ศุกร์'];
+        else if (daysCount === 5) workoutDays = ['จันทร์', 'อังคาร', 'พุธ', 'ศุกร์', 'เสาร์'];
+
+        let baseExercises = [];
+        if (goal === 'fat_loss') {
+            baseExercises = [
+                { name: 'ท่าสควอช (Squat)', rep: '15 ครั้ง / 3 เซต' },
+                { name: 'ท่าวิดพื้น (Push-Up)', rep: '12 ครั้ง / 3 เซต' },
+                { name: 'ท่าแพลงก์ (Plank)', rep: 'ค้างไว้ 30 วินาที / 3 เซต' }
+            ];
+            if (injury.includes('เข่า') || bmi >= 25) {
+                baseExercises[0] = { name: 'ท่านั่งพิงกำแพงค้าง (Wall Sit)', rep: '20 วินาที / 3 เซต' };
+            }
+        } else if (goal === 'hypertrophy') {
+            baseExercises = [
+                { name: 'ยกดัมเบลอัดอก (Dumbbell Press)', rep: '12 ครั้ง / 4 เซต' },
+                { name: 'ดัมเบลสควอชเพิ่มพลังขา', rep: '10 ครั้ง / 4 เซต' },
+                { name: 'ก้มพายดัมเบลสร้างหลัง (Row)', rep: '12 ครั้ง / 4 เซต' }
+            ];
+        } else {
+            baseExercises = [
+                { name: 'วิ่งจ๊อกกิ้ง หรือ เดินเร็วต่อเนื่อง', rep: '20 นาที' },
+                { name: 'ท่าปีนเขากลางอากาศ (Mountain Climber)', rep: 'ข้างละ 15 ครั้ง / 3 เซต' },
+                { name: 'ยืดเหยียดกล้ามเนื้อทั่วร่าง', rep: '10 นาที' }
+            ];
+        }
+
+        const timetableDiv = document.getElementById('timetable');
+        timetableDiv.innerHTML = '';
+
+        days.forEach(dayName => {
+            const isPlayDay = workoutDays.includes(dayName);
+            const card = document.createElement('div');
+            card.className = `day-card ${isPlayDay ? 'active' : ''}`;
+
+            let html = `<div class="day-name">${dayName}</div>`;
+
+            if (isPlayDay) {
+                if (specialExercise) {
+                    html += `
+                        <div class="exercise-item" style="border-color: #10b981;">
+                            <span class="special-badge">✨ ท่าพิเศษของคุณ</span><br>
+                            <strong style="color: #fff;">${specialExercise}</strong><br>
+                            <span style="color: #10b981; font-size: 12px;">🎯 ซ้อม 3 เซตตามชอบ</span>
+                        </div>
+                    `;
+                }
+
+                baseExercises.forEach(ex => {
+                    html += `
+                        <div class="exercise-item">
+                            <strong style="color: #fff;">${ex.name}</strong><br>
+                            <span style="color: var(--accent-color); font-size: 12px;">🎯 ${ex.rep}</span>
+                        </div>
+                    `;
+                });
+            } else {
+                html += `<div class="rest-text">😴 วันนอนพักผ่อน<br><span style="font-size:12px; color:var(--text-sub);">ให้กล้ามเนื้อฟื้นตัว</span></div>`;
+            }
+
+            card.innerHTML = html;
+            timetableDiv.appendChild(card);
+        });
+
+        document.getElementById('resultSection').style.display = 'block';
+        document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function downloadAsImage() {
+        const target = document.getElementById('captureArea');
+        
+        html2canvas(target, {
+            backgroundColor: "#151f32",
+            scale: 2,
+            logging: false,
+            useCORS: true
+        }).then(canvas => {
+            const image = canvas.toDataURL("image/png");
+            const link = document.createElement('a');
+            link.download = 'ตารางซ้อมออกกำลังกาย_กลุ่มเด็กใหม่_slp.png';
+            link.href = image;
+            link.click();
+        });
+    }
+</script>
+
+</body>
+</html>
